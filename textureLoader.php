@@ -19,7 +19,7 @@ class Constants
     const REGEX_USERNAME = "\w{1,16}$";
     const REGEX_UUIDv4 = "\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b";
     const REGEX_UUIDv1 = "[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{4}\-[a-f0-9]{12}";
-    const MAX_FILE_SIZE = 300000;
+    const MAX_FILE_SIZE = 1000000;
     const VALIDATE_SIZE = array(
         "skin" => array(
             array('w' => 64, 'h' => 64), array('w' => 64, 'h' => 32), array('w' => 128, 'h' => 64),
