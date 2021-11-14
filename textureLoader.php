@@ -225,16 +225,6 @@ function logs()
         }
     }
 }
-function getTexture($login, $type)
-{
-    header("Content-type: image/png");
-    switch ($type) {
-        case 'cloak':
-            die(Constants::getCloak($login));
-        default:
-            die(Constants::getSkin($login));
-    }
-}
 function debug_log($what, $log)
 {
     if (Constants::DEBUG) {
