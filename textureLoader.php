@@ -22,12 +22,12 @@ class Constants
     const MAX_FILE_SIZE = 1000000;
     const VALIDATE_SIZE = array(
         "skin" => array(
-        	array('w' => 64, 'h' => 64), array('w' => 64, 'h' => 32),
-			array('w' => 128, 'h' => 64), array('w' => 128, 'h' => 128),
-			array('w' => 256, 'h' => 128), array('w' => 256, 'h' => 256),
-			array('w' => 512, 'h' => 256), array('w' => 512, 'h' => 512),
-			array('w' => 1024, 'h' => 512), array('w' => 1024, 'h' => 1024)
-		),
+            array('w' => 64, 'h' => 64), array('w' => 64, 'h' => 32),
+            array('w' => 128, 'h' => 64), array('w' => 128, 'h' => 128),
+            array('w' => 256, 'h' => 128), array('w' => 256, 'h' => 256),
+            array('w' => 512, 'h' => 256), array('w' => 512, 'h' => 512),
+            array('w' => 1024, 'h' => 512), array('w' => 1024, 'h' => 1024)
+        ),
         "cloak" => array(
             array('w' => 64, 'h' => 32), array('w' => 128, 'h' => 64), array('w' => 256, 'h' => 128),
             array('w' => 512, 'h' => 256), array('w' => 1024, 'h' => 512)
