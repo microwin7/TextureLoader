@@ -137,7 +137,7 @@ class Methods
                 $head[trim($t[0])] = trim($t[1]);
             else {
                 $head[] = $value;
-                if (preg_match("#HTTP/[\d.]+\s+([0-9]+)#", $value, $out))
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $value, $out))
                     $head['reponse_code'] = intval($out[1]);
             }
         }
