@@ -20,19 +20,22 @@ class Constants
     const REGEX_UUIDv4 = "\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b";
     const REGEX_UUIDv1 = "[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{4}\-[a-f0-9]{12}";
     const MAX_FILE_SIZE = 1000000;
-    const VALIDATE_SIZE = array(
-        "skin" => array(
-            array('w' => 64, 'h' => 64), array('w' => 64, 'h' => 32),
-            array('w' => 128, 'h' => 64), array('w' => 128, 'h' => 128),
-            array('w' => 256, 'h' => 128), array('w' => 256, 'h' => 256),
-            array('w' => 512, 'h' => 256), array('w' => 512, 'h' => 512),
-            array('w' => 1024, 'h' => 512), array('w' => 1024, 'h' => 1024)
-        ),
-        "cloak" => array(
-            array('w' => 64, 'h' => 32), array('w' => 128, 'h' => 64), array('w' => 256, 'h' => 128),
-            array('w' => 512, 'h' => 256), array('w' => 1024, 'h' => 512)
-        )
-    );
+    const VALIDATE_SIZE = [
+        "skin" => [
+            ['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32],
+            ['w' => 128, 'h' => 64], ['w' => 128, 'h' => 128],
+            ['w' => 256, 'h' => 128], ['w' => 256, 'h' => 256],
+            ['w' => 512, 'h' => 256], ['w' => 512, 'h' => 512],
+            ['w' => 1024, 'h' => 512], ['w' => 1024, 'h' => 1024]
+        ],
+        "cloak" => [
+            ['w' => 64, 'h' => 32],
+            ['w' => 128, 'h' => 64],
+            ['w' => 256, 'h' => 128],
+            ['w' => 512, 'h' => 256],
+            ['w' => 1024, 'h' => 512]
+        ]
+    ];
 }
 class Occurrences
 {
@@ -63,50 +66,49 @@ class Occurrences
     }
     public static function initMainDB()
     {
-        if (self::$mainDB == null)
-            self::$mainDB = new db();
+        if (self::$mainDB == null) self::$mainDB = new db(Constants::DB_HOST, Constants::DB_USER, Constants::DB_PASS, Constants::DB_DB, Constants::DB_PORT);
     }
     public static function getData()
     {
         if (self::$data == null) {
             $data = json_decode(file_get_contents('php://input'), true);
-            if ($data === null) response(array('error' => 'null_data'));
+            if ($data === null) response(['error' => 'null_data']);
             return self::$data = $data;
         } else return self::$data;
     }
-    public static function getLogin()
+    public static function getLogin(): ?string
     {
         if (self::$login == null) {
             $login = (string) self::getData()['login'];
-            exists($login) ?: response(array('error' => 'null_login'));
-            preg_match("/^" . Constants::REGEX_USERNAME . "/", $login) ?: response(array('error' => 'invalid_login'));
+            exists($login) ?: response(['error' => 'null_login']);
+            preg_match("/^" . Constants::REGEX_USERNAME . "/", $login) ?: response(['error' => 'invalid_login']);
             return self::$login = $login;
         } else return self::$login;
     }
-    public static function getAccessToken()
+    public static function getAccessToken(): ?string
     {
         if (self::$accessToken == null) {
             $accessToken = (string) self::getData()['accessToken'];
-            exists($accessToken) ?: response(array('error' => 'null_accessToken'));
+            exists($accessToken) ?: response(['error' => 'null_accessToken']);
             return self::$accessToken = $accessToken;
         } else return self::$accessToken;
     }
-    public static function getUUID()
+    public static function getUUID(): ?string
     {
         if (self::$uuid == null) {
             $uuid = (string) self::getData()['uuid'];
-            exists($uuid) ?: response(array('error' => 'null_uuid'));
+            exists($uuid) ?: response(['error' => 'null_uuid']);
             (preg_match("/" . Constants::REGEX_UUIDv1 . "/", $uuid) ||
-                preg_match("/" . Constants::REGEX_UUIDv4 . "/", $uuid)) ?: response(array('error' => 'invalid_uuid'));
+                preg_match("/" . Constants::REGEX_UUIDv4 . "/", $uuid)) ?: response(['error' => 'invalid_uuid']);
             return self::$uuid = $uuid;
-        } else return self::$uuid;;
+        } else return self::$uuid;
     }
-    public static function getUrl()
+    public static function getUrl(): ?string
     {
         if (self::$url == null) {
             $url = (string) self::getData()['url'];
-            exists($url) ?: response(array('error' => 'null_url'));
-            filter_var($url, FILTER_VALIDATE_URL,  FILTER_FLAG_PATH_REQUIRED) ?: response(array('error' => 'invalid_url'));
+            exists($url) ?: response(['error' => 'null_url']);
+            filter_var($url, FILTER_VALIDATE_URL,  FILTER_FLAG_PATH_REQUIRED) ?: response(['error' => 'invalid_url']);
             return self::$url = $url;
         } else return self::$url;
     }
@@ -122,14 +124,14 @@ class Methods
                 debug_log('HEADERS', $key . ': ' . $value);
             }
         }
-        ($headers['reponse_code'] == 200) ?: response(array('error' => 'invalid_response'));
-        ($headers['Content-Type'] == "application/octet-stream" || $headers['Content-Type'] == "image/png") ?: response(array('error' => 'invalid_headers_url'));
+        ($headers['reponse_code'] == 200) ?: response(['error' => 'invalid_response']);
+        ($headers['Content-Type'] == "application/octet-stream" || $headers['Content-Type'] == "image/png") ?: response(['error' => 'invalid_headers_url']);
         return $data;
     }
-    private static function parseHeaders($headers)
+    private static function parseHeaders($headers): array
     {
-        $head = array();
-        foreach ($headers as $key => $value) {
+        $head = [];
+        foreach ($headers as $value) {
             $t = explode(':', $value, 2);
             if (isset($t[1]))
                 $head[trim($t[0])] = trim($t[1]);
@@ -144,6 +146,8 @@ class Methods
 }
 class Check
 {
+    public static bool $valid_size = false;
+
     public static function skin()
     {
         self::handle(Constants::SKIN_PATH);
@@ -155,36 +159,37 @@ class Check
     private static function handle($path)
     {
         $data = Methods::getTextureDownloadUrl(Occurrences::$url);
-        if (Occurrences::$requiredUrl == "skin") !self::slim($data) ?: response(array('error' => 'slim_not_supported'));
+        if (Occurrences::$requiredUrl == "skin") !self::slim($data) ?: response(['error' => 'slim_not_supported']);
         $mime = self::getImageMimeType($data);
-        if ($mime != "png") response(array('error' => 'resource_not_png'));
+        if ($mime != "png") response(['error' => 'resource_not_png']);
         $image = imagecreatefromstring($data);
         $w = imagesx($image);
         $h = imagesy($image);
         $sizes = Constants::VALIDATE_SIZE[Occurrences::$requiredUrl];
-        $valid_size = false;
-        foreach ($sizes as $key => $value) {
-            if ($value['w'] == $w && $value['h'] == $h) $valid_size = true;
+        foreach ($sizes as $value) {
+            if ($value['w'] == $w && $value['h'] == $h) self::$valid_size = true;
         }
-        $valid_size ?: response(array('error' => 'invalid_size_png'));
-        if (file_put_contents($path . Occurrences::$login . ".png", $data)) response(array('success' => true));
+        self::$valid_size ?: response(['error' => 'invalid_size_png']);
+        if (file_put_contents($path . Occurrences::$login . ".png", $data)) response(['success' => true]);
     }
-    private static function getBytesFromHexString($hexdata)
+    private static function getBytesFromHexString($hexdata): string
     {
-        for ($count = 0; $count < strlen($hexdata); $count += 2)
-            $bytes[] = chr(hexdec(substr($hexdata, $count, 2)));
+        $bytes = [];
+        for ($count = 0; $count < strlen($hexdata); $count += 2) {
+            $bytes = chr(hexdec(substr($hexdata, $count, 2)));
+        }
         return implode($bytes);
     }
-    private static function getImageMimeType($imagedata)
+    private static function getImageMimeType($imagedata): ?string
     {
-        $imagemimetypes = array(
+        $imagemimetypes = [
             "jpeg" => "FFD8",
             "png" => "89504E470D0A1A0A",
             "gif" => "474946",
             "bmp" => "424D",
             "tiff" => "4949",
             "tiff" => "4D4D"
-        );
+        ];
         foreach ($imagemimetypes as $mime => $hexbytes) {
             $bytes = self::getBytesFromHexString($hexbytes);
             if (substr($imagedata, 0, strlen($bytes)) == $bytes)
@@ -199,8 +204,7 @@ class Check
         $x = $fraction * 6.75;
         $y = $fraction * 2.5;
         $rgba = imagecolorsforindex($image, imagecolorat($image, $x, $y));
-        if ($rgba["alpha"] === 127)
-            return true;
+        if ($rgba["alpha"] === 127) return true;
         else return false;
     }
 }
@@ -211,8 +215,8 @@ function start()
     $requiredUrl = $oc::$requiredUrl;
     $oc::initMainDB();
     $tb = Constants::TB_USER;
-    $qr = $oc::$mainDB->query("SELECT `id` FROM $tb WHERE `login`=? AND `uuid` = ? AND `accessToken` = ? LIMIT 1", "sss", $oc::$login, $oc::$uuid, $oc::$accessToken)->fetch_assoc();
-    if ($qr == null) response(array('error' => 'not_found'));
+    $qr = $oc::$mainDB->query(sprintf("SELECT `id` FROM %s WHERE `login`=? AND `uuid` = ? AND `accessToken` = ? LIMIT 1", $tb), "sss", $oc::$login, $oc::$uuid, $oc::$accessToken)->fetch_assoc();
+    if ($qr == null) response(['error' => 'not_found']);
     $check = new Check();
     $check->$requiredUrl();
 }
@@ -239,21 +243,21 @@ function response($msg = null)
     header("Content-Type: application/json; charset=UTF-8");
     die(json_encode((object) $msg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
-function exists(...$var)
+function exists(...$var): bool
 {
-    $i = true;
+    $i = false;
     foreach ($var as $v) {
-        $i = (!empty($v) && isset($v) && $i) ? true : false;
+        $i = !empty($v);
     }
     return $i;
 }
 class db
 {
-    private $mysqli;
+    private mysqli $mysqli;
     private $last;
-    public function __construct()
+    public function __construct($host, $user, $password, $database, $port)
     {
-        $this->mysqli = new mysqli(Constants::DB_HOST, Constants::DB_USER, Constants::DB_PASS, Constants::DB_DB, Constants::DB_PORT);
+        $this->mysqli = new mysqli($host, $user, $password, $database, $port);
         if ($this->mysqli->connect_errno) {
             $this->debug("Connect error: " . $this->mysqli->connect_error);
         }
@@ -265,11 +269,9 @@ class db
     }
     public function close()
     {
-        if (!is_null($this->mysqli)) {
-            $this->mysqli->close();
-        }
+        $this->mysqli->close();
     }
-    function refValues($arr)
+    function refValues($arr): array
     {
         $refs = array();
         foreach ($arr as $key => $value) {
@@ -277,10 +279,9 @@ class db
         }
         return $refs;
     }
-    private function argsToString($args)
+    private function argsToString($args): string
     {
-        if (count($args) == 0)
-            return "";
+        if (count($args) == 0) return "";
         $str = $args[0] . "";
         for ($i = 1; $i < count($args); ++$i) {
             $str .= ", " . $args[$i];
@@ -296,7 +297,7 @@ class db
             exit();
         }
         array_unshift($args, $form);
-        if ($form != "") {
+        if (!empty($form)) {
             call_user_func_array(array($stmt, "bind_param"), $this->refValues($args));
         }
         $stmt->execute();
@@ -304,28 +305,44 @@ class db
             $this->debug("Statement execution error: " . $stmt->error . "($sql)");
             exit();
         }
-        $this->last = $stmt->get_result();
+        $this->setLast($stmt->get_result());
         $stmt->close();
-        return $this->last;
+        return $this->getLast();
     }
     public function assoc()
     {
-        if ($this->last === null) {
-            return null;
+        if (!is_null($this->getLast())) {
+            return $this->getLast()->fetch_assoc();
         }
-        return $this->last->fetch_assoc();
+        return null;
     }
     public function all()
     {
-        if ($this->last === null) {
-            return null;
+        if (!is_null($this->getLast())) {
+            return $this->getLast()->fetch_all();
         }
-        return $this->last->fetch_all();
+        return null;
     }
     public function debug($message)
     {
         if (Constants::DEBUG) {
             file_put_contents("debug.log", date('d.m.Y H:i:s - ') . $message . "\n", FILE_APPEND);
         }
+    }
+
+    /**
+     * @return mixed $last
+     */
+    public function getLast()
+    {
+        return $this->last;
+    }
+
+    /**
+     * @param $last
+     */
+    public function setLast($last): void
+    {
+        $this->last = $last;
     }
 }
